@@ -62,9 +62,34 @@ const getUserById = async (req, res) => {
   res.json(user);
 };
 
+const getUsers = async (req, res) => {
+  const page = parseInt(req.query.page) || 1;
+  const limit = parseInt(req.query.limit) || 5;
+  const skip = (page - 1) * limit;
+
+  const search = req.query.search || "";
+  const sort = req.query.sort || "-createdAt";
+
+  const query = {
+    name: { $regex: search, $options: "i" },
+  };
+  console.log(sort, "<====sort");
+
+  const users = await User.find(query).sort(sort).skip(skip).limit(limit);
+
+  const total = await User.countDocuments(query);
+
+  res.json({
+    total,
+    page,
+    pages: Math.ceil(total / limit),
+    users,
+  });
+};
+
 module.exports = {
   createUser,
-
   loginUser,
   getUserById,
+  getUsers,
 };

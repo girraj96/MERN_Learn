@@ -4,7 +4,6 @@ const router = express.Router();
 const {
   getUsers,
   createUser,
-  deleteUser,
   getUserById,
   loginUser,
 } = require("../controllers/userController");
@@ -16,7 +15,8 @@ router.post("/user/signup", createUser);
 // Login
 router.post("/user/login", loginUser);
 
-// GET all users
+// GET  user by id
 router.get("/user/profile/:id", protect, getUserById);
+router.get("/users", protect, getUsers);
 
 module.exports = router;

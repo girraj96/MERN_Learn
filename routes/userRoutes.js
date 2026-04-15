@@ -8,20 +8,15 @@ const {
   getUserById,
   loginUser,
 } = require("../controllers/userController");
+const protect = require("../middleware/authMiddleware");
 
-// GET all users
-router.get("/users", getUsers);
-
-// GET user by ID
-router.get("/users/:id", getUserById);
-
-// POST user
+// Register
 router.post("/user/signup", createUser);
 
-// POST user
+// Login
 router.post("/user/login", loginUser);
 
-// DELETE user
-router.delete("/users/:id", deleteUser);
+// GET all users
+router.get("/user/profile/:id", protect, getUserById);
 
 module.exports = router;

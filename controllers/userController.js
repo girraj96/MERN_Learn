@@ -2,22 +2,6 @@ const User = require("../models/User");
 const bcrypt = require("bcrypt");
 const jwt = require("jsonwebtoken");
 
-const getUsers = async (req, res) => {
-  const users = await User.find();
-  res.json(users);
-};
-
-const getUserById = async (req, res) => {
-  const id = req.params.id;
-  const user = await User.findById(id);
-
-  if (!user) {
-    return res.status(404).json({ message: "User not found" });
-  }
-
-  res.json(user);
-};
-
 // POST signup
 const createUser = async (req, res) => {
   const { name, email, password } = req.body || {};
@@ -58,32 +42,29 @@ const loginUser = async (req, res) => {
     return res.status(400).json({ message: "Password is incorrect" });
   }
 
-  const token = jwt.sign({ id: user._id }, "secret123", { expiresIn: "1d" });
+  const token = jwt.sign({ id: user._id }, process.env.JWT_SECRET, {
+    expiresIn: "1d",
+  });
   res.json({
     message: "Login successful!",
     token,
   });
 };
 
-// DELETE user
-const deleteUser = async (req, res) => {
-  const id = req.params.idf;
+const getUserById = async (req, res) => {
+  const { id } = req.params;
+  const user = await User.findById(id);
 
-  const userExists = await User.findById({ id });
-
-  if (!userExists) {
+  if (!user) {
     return res.status(404).json({ message: "User not found" });
   }
 
-  await User.deleteOne();
-
-  res.json({ message: "User deleted successfully" });
+  res.json(user);
 };
 
 module.exports = {
-  getUsers,
   createUser,
-  deleteUser,
-  getUserById,
+
   loginUser,
+  getUserById,
 };

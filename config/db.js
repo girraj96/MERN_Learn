@@ -2,9 +2,7 @@ const mongoose = require("mongoose");
 
 const connectDB = async () => {
   try {
-    await mongoose.connect(
-      "mongodb+srv://mernUser:mern123@mern-learn-cluster.wappsqa.mongodb.net/?appName=mern-learn-cluster",
-    );
+    await mongoose.connect(process.env.MONGO_URI);
 
     console.log("MongoDB connected");
   } catch (error) {

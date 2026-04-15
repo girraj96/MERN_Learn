@@ -20,7 +20,7 @@ const getUserById = async (req, res) => {
 
 // POST signup
 const createUser = async (req, res) => {
-  const { name, email, password } = req.body;
+  const { name, email, password } = req.body || {};
 
   if (!name || !email || !password) {
     return res.status(400).json({ message: "All fields are required" });
@@ -40,8 +40,7 @@ const createUser = async (req, res) => {
 
 // POST login
 const loginUser = async (req, res) => {
-  console.log(req.body, "fasdfklajsdfas");
-  const { email, password } = req.body;
+  const { email, password } = req.body || {};
 
   if (!email || !password) {
     return res.status(400).json({ message: "All fields are required" });
@@ -59,10 +58,10 @@ const loginUser = async (req, res) => {
     return res.status(400).json({ message: "Password is incorrect" });
   }
 
-  const jwtToken = jwt.sign({ id: user._id }, "secret123", { expiresIn: "1d" });
+  const token = jwt.sign({ id: user._id }, "secret123", { expiresIn: "1d" });
   res.json({
     message: "Login successful!",
-    jwtToken,
+    token,
   });
 };
 

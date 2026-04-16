@@ -1,45 +1,54 @@
 const User = require("../models/User");
 const bcrypt = require("bcrypt");
 const jwt = require("jsonwebtoken");
+const asyncHandler = require("../utils/asyncHandler");
 
 // POST signup
-const createUser = async (req, res) => {
+const createUser = asyncHandler(async (req, res) => {
   const { name, email, password } = req.body || {};
 
   if (!name || !email || !password) {
-    return res.status(400).json({ message: "All fields are required" });
+    const error = new Error("All fields are required");
+    error.statusCode = 400;
+    throw error;
   }
 
   const userExists = await User.findOne({ email });
   if (userExists) {
-    return res.status(400).json({ message: "User already exists" });
+    const error = new Error("User already exists");
+    error.statusCode = 400;
+    throw error;
   }
 
   const hashedPassword = await bcrypt.hash(password, 10);
 
   const user = await User.create({ name, email, password: hashedPassword });
 
-  res.status(201).json({ message: "User registered", user });
-};
+  res.status(201).json({ message: "User registered!", user });
+});
 
 // POST login
-const loginUser = async (req, res) => {
+const loginUser = asyncHandler(async (req, res) => {
   const { email, password } = req.body || {};
 
   if (!email || !password) {
-    return res.status(400).json({ message: "All fields are required" });
+    const error = new Error("All fields are required");
+    error.statusCode = 400;
+    throw error;
   }
 
   const user = await User.findOne({ email });
   if (!user) {
-    return res
-      .status(400)
-      .json({ message: "Email is not registered with us!" });
+    const error = new Error("Email is not registered with us!");
+    error.statusCode = 400;
+    throw error;
   }
 
   const isPasswordMatched = await bcrypt.compare(password, user.password);
   if (!isPasswordMatched) {
-    return res.status(400).json({ message: "Password is incorrect" });
+    const error = new Error("Password is incorrect");
+    error.statusCode = 400;
+    throw error;
   }
 
   const token = jwt.sign({ id: user._id }, process.env.JWT_SECRET, {
@@ -49,20 +58,22 @@ const loginUser = async (req, res) => {
     message: "Login successful!",
     token,
   });
-};
+});
 
 const getUserById = async (req, res) => {
   const { id } = req.params;
   const user = await User.findById(id);
 
   if (!user) {
-    return res.status(404).json({ message: "User not found" });
+    const error = new Error("User not found");
+    error.statusCode = 404;
+    throw error;
   }
 
   res.json(user);
 };
 
-const getUsers = async (req, res) => {
+const getUsers = asyncHandler(async (req, res) => {
   const page = parseInt(req.query.page) || 1;
   const limit = parseInt(req.query.limit) || 5;
   const skip = (page - 1) * limit;
@@ -85,7 +96,7 @@ const getUsers = async (req, res) => {
     pages: Math.ceil(total / limit),
     users,
   });
-};
+});
 
 module.exports = {
   createUser,

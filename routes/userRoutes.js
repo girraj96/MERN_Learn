@@ -6,9 +6,10 @@ const {
   createUser,
   getUserById,
   loginUser,
+  uploadProfileImage,
 } = require("../controllers/userController");
 const protect = require("../middleware/authMiddleware");
-const upload = require("../middleware/uploadMiddleware");
+const upload = require("../middleware/uploadCloud");
 
 // Register
 router.post("/user/signup", createUser);
@@ -20,15 +21,10 @@ router.post("/user/login", loginUser);
 router.get("/user/profile/:id", protect, getUserById);
 router.get("/users", protect, getUsers);
 router.post(
-  "/user/upload-profile-pic",
+  "/user/upload",
   protect,
-  upload.single("profile-image"),
-  (req, res) => {
-    res.json({
-      message: "Image uploaded",
-      file: `/uploads/${req.file.filename}`,
-    });
-  },
+  upload.single("image"),
+  uploadProfileImage,
 );
 
 module.exports = router;

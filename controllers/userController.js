@@ -98,9 +98,30 @@ const getUsers = asyncHandler(async (req, res) => {
   });
 });
 
+const uploadProfileImage = asyncHandler(async (req, res) => {
+  const user = await User.findById(req.user.id);
+
+  if (!user) {
+    const error = new Error("User not found");
+    error.statusCode = 404;
+    throw error;
+  }
+
+  // 👇 THIS IS WHAT YOU ASKED
+  user.profileImage = req.file.path;
+
+  await user.save();
+
+  res.json({
+    message: "Profile image updated",
+    profileImage: user.profileImage,
+  });
+});
+
 module.exports = {
   createUser,
   loginUser,
   getUserById,
   getUsers,
+  uploadProfileImage,
 };

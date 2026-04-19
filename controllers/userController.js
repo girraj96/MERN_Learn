@@ -2,10 +2,11 @@ const User = require("../models/User");
 const bcrypt = require("bcrypt");
 const jwt = require("jsonwebtoken");
 const asyncHandler = require("../utils/asyncHandler");
+const userService = require("../services/userService");
 
 // POST signup
 const createUser = asyncHandler(async (req, res) => {
-  const { name, email, password } = req.body || {};
+  const { name, email, password, role } = req.body || {};
 
   if (!name || !email || !password) {
     const error = new Error("All fields are required");
@@ -22,7 +23,12 @@ const createUser = asyncHandler(async (req, res) => {
 
   const hashedPassword = await bcrypt.hash(password, 10);
 
-  const user = await User.create({ name, email, password: hashedPassword });
+  const user = await User.create({
+    name,
+    email,
+    password: hashedPassword,
+    role,
+  });
 
   res.status(201).json({ message: "User registered!", user });
 });
@@ -51,9 +57,13 @@ const loginUser = asyncHandler(async (req, res) => {
     throw error;
   }
 
-  const token = jwt.sign({ id: user._id }, process.env.JWT_SECRET, {
-    expiresIn: "1d",
-  });
+  const token = jwt.sign(
+    { id: user._id, role: user.role },
+    process.env.JWT_SECRET,
+    {
+      expiresIn: "1d",
+    },
+  );
   res.json({
     message: "Login successful!",
     token,
@@ -61,15 +71,7 @@ const loginUser = asyncHandler(async (req, res) => {
 });
 
 const getUserById = async (req, res) => {
-  const { id } = req.params;
-  const user = await User.findById(id);
-
-  if (!user) {
-    const error = new Error("User not found");
-    error.statusCode = 404;
-    throw error;
-  }
-
+  const user = await userService.getUserProfile(req.user.id);
   res.json(user);
 };
 
@@ -118,10 +120,17 @@ const uploadProfileImage = asyncHandler(async (req, res) => {
   });
 });
 
+const deleteUser = asyncHandler(async (req, res) => {
+  const { id } = req.params;
+  const user = await userService.deleteUser(id);
+  res.json({ message: "User deleted", user });
+});
+
 module.exports = {
   createUser,
   loginUser,
   getUserById,
   getUsers,
   uploadProfileImage,
+  deleteUser,
 };

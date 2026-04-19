@@ -7,8 +7,9 @@ const {
   getUserById,
   loginUser,
   uploadProfileImage,
+  deleteUser,
 } = require("../controllers/userController");
-const protect = require("../middleware/authMiddleware");
+const { protect, authorize } = require("../middleware/authMiddleware");
 const upload = require("../middleware/uploadCloud");
 
 // Register
@@ -18,7 +19,7 @@ router.post("/user/signup", createUser);
 router.post("/user/login", loginUser);
 
 // GET  user by id
-router.get("/user/profile/:id", protect, getUserById);
+router.get("/user/profile", protect, getUserById);
 router.get("/users", protect, getUsers);
 router.post(
   "/user/upload",
@@ -26,5 +27,7 @@ router.post(
   upload.single("image"),
   uploadProfileImage,
 );
+
+router.delete("/user/delete/:id", protect, authorize("admin"), deleteUser);
 
 module.exports = router;

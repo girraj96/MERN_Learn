@@ -12,6 +12,7 @@ const userSchema = new mongoose.Schema(
       required: true,
       trim: true,
       unique: true,
+      index: true,
     },
 
     password: {
@@ -20,6 +21,11 @@ const userSchema = new mongoose.Schema(
     },
     profileImage: {
       type: String,
+    },
+    role: {
+      type: String,
+      enum: ["user", "admin"],
+      default: "user",
     },
   },
   {
